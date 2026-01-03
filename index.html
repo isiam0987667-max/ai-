@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>My AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{background:#0f172a;color:white;font-family:Arial}
+#box{max-width:500px;margin:auto;padding:20px}
+input,button{width:100%;padding:12px;margin-top:10px}
+.chat{margin-top:15px}
+</style>
+</head>
+<body>
+
+<div id="box">
+<h2>🤖 My AI</h2>
+<div id="chat" class="chat"></div>
+<input id="msg" placeholder="কিছু লিখো...">
+<button onclick="send()">Send</button>
+</div>
+
+<script>
+async function send(){
+  const input = document.getElementById("msg");
+  const msg = input.value;
+  input.value = "";
+
+  document.getElementById("chat").innerHTML += `<p><b>You:</b> ${msg}</p>`;
+
+  const res = await fetch("http://localhost:3000/chat",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({message:msg})
+  });
+
+  const data = await res.json();
+  document.getElementById("chat").innerHTML += `<p><b>AI:</b> ${data.reply}</p>`;
+}
+</script>
+
+</body>
+</html>
