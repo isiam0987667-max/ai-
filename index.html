@@ -1,44 +1,103 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="bn">
 <head>
 <meta charset="UTF-8">
-<title>My AI</title>
+<title>🤖 সিয়াম AI</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{background:#0f172a;color:white;font-family:Arial}
-#box{max-width:500px;margin:auto;padding:20px}
-input,button{width:100%;padding:12px;margin-top:10px}
-.chat{margin-top:15px}
+body{margin:0;padding:0;font-family:'Poppins',sans-serif;background:#f5f5f7;display:flex;justify-content:center;}
+.container{width:100%;max-width:500px;margin:20px auto;background:#fff;border-radius:20px;box-shadow:0 5px 15px rgba(0,0,0,0.2);overflow:hidden;display:flex;flex-direction:column;}
+header{background:#6c5ce7;color:white;padding:15px;font-size:20px;text-align:center;font-weight:bold;}
+.chat-box{flex:1;padding:15px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;height:300px;background:#f0edf7;}
+.message{max-width:70%;padding:10px 15px;border-radius:15px;word-wrap:break-word;font-size:14px;}
+.user-msg{align-self:flex-end;background:#74b9ff;color:white;border-bottom-right-radius:0;}
+.ai-msg{align-self:flex-start;background:#ffeaa7;color:#2d3436;border-bottom-left-radius:0;}
+input,button{padding:12px;font-size:14px;border-radius:10px;border:none;margin-top:5px;}
+input{flex:1;border:1px solid #ccc;}
+.send-btn{background:#6c5ce7;color:white;cursor:pointer;}
+form{display:flex;padding:10px;gap:5px;background:#fff;}
+img{width:100%;border-radius:10px;margin-top:5px;}
+.vision-section{padding:10px;background:#f5f5f7;display:flex;flex-direction:column;gap:5px;}
+.vision-section button{background:#00b894;color:white;cursor:pointer;}
 </style>
 </head>
 <body>
+<div class="container">
+<header>🤖 সিয়াম AI</header>
+<div class="chat-box" id="chat"></div>
 
-<div id="box">
-<h2>🤖 My AI</h2>
-<div id="chat" class="chat"></div>
-<input id="msg" placeholder="কিছু লিখো...">
-<button onclick="send()">Send</button>
+<form onsubmit="send(); return false;">
+<input id="msg" placeholder="লিখো / ছবি চাও ..." autocomplete="off">
+<button class="send-btn">Send</button>
+</form>
+
+<div class="vision-section">
+<input type="file" id="image">
+<input type="text" id="question" placeholder="ছবি সম্পর্কে প্রশ্ন লিখো">
+<button onclick="askImage()">Ask AI</button>
+<div id="visionResult"></div>
+</div>
 </div>
 
 <script>
 async function send(){
-  const input = document.getElementById("msg");
-  const msg = input.value;
-  input.value = "";
+    const msg = document.getElementById("msg").value;
+    if(!msg) return;
+    document.getElementById("msg").value = "";
+    const chat = document.getElementById("chat");
+    chat.innerHTML += `<div class="message user-msg">${msg}</div>`;
+    chat.scrollTop = chat.scrollHeight;
 
-  document.getElementById("chat").innerHTML += `<p><b>You:</b> ${msg}</p>`;
+    // Identity / Owner
+    if(/তুমি কে|who are you/i.test(msg)){
+        chat.innerHTML += `<div class="message ai-msg">আমি সিয়াম / I am Siam 🤖</div>`;
+        chat.scrollTop = chat.scrollHeight;
+        return;
+    }
+    if(/তোমার নাম|নিজেকে পরিচয়/i.test(msg)){
+        chat.innerHTML += `<div class="message ai-msg">আমি সিয়াম / I am Siam 🤖</div>`;
+        chat.scrollTop = chat.scrollHeight;
+        return;
+    }
+    if(/মালিকের নাম|owner/i.test(msg)){
+        chat.innerHTML += `<div class="message ai-msg">আমার মালিক: সিয়াম 😎</div>`;
+        chat.scrollTop = chat.scrollHeight;
+        return;
+    }
 
-  const res = await fetch("http://localhost:3000",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({message:msg})
-  });
+    const res = await fetch("http://localhost:3000/chat",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({message:msg})
+    });
+    const data = await res.json();
 
-  const data = await res.json();
-  document.getElementById("chat").innerHTML += `<p><b>AI:</b> ${data.reply}</p>`;
+    if(data.type==="images"){
+        data.images.forEach(url=>{
+            chat.innerHTML += `<div class="message ai-msg"><img src="${url}"></div>`;
+        });
+    } else {
+        chat.innerHTML += `<div class="message ai-msg">${data.reply}</div>`;
+    }
+    chat.scrollTop = chat.scrollHeight;
+}
+
+async function askImage(){
+    const img = document.getElementById("image").files[0];
+    const q = document.getElementById("question").value;
+    if(!img || !q) return;
+
+    const formData = new FormData();
+    formData.append("image", img);
+    formData.append("question", q);
+
+    const res = await fetch("http://localhost:3000/vision",{
+        method:"POST",
+        body: formData
+    });
+    const data = await res.json();
+    document.getElementById("visionResult").innerHTML = `<p><b>AI:</b> ${data.reply}</p>`;
 }
 </script>
-
 </body>
 </html>
-
