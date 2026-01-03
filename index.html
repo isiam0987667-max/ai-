@@ -28,7 +28,7 @@ async function send(){
 
   document.getElementById("chat").innerHTML += `<p><b>You:</b> ${msg}</p>`;
 
-  const res = await fetch("http://localhost:3000/chat",{
+  const res = await fetch("http://localhost:3000",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify({message:msg})
@@ -41,3 +41,4 @@ async function send(){
 
 </body>
 </html>
+
