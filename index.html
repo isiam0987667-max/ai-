@@ -65,7 +65,7 @@ async function send(){
         return;
     }
 
-    const res = await fetch("http://localhost:3000/chat",{
+    const res = await fetch("http://localhost:3000",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body: JSON.stringify({message:msg})
@@ -91,7 +91,7 @@ async function askImage(){
     formData.append("image", img);
     formData.append("question", q);
 
-    const res = await fetch("http://localhost:3000/vision",{
+    const res = await fetch("http://localhost:3000",{
         method:"POST",
         body: formData
     });
@@ -101,3 +101,4 @@ async function askImage(){
 </script>
 </body>
 </html>
+
